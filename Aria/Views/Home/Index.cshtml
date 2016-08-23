@@ -12,32 +12,68 @@
     <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
     <link rel="stylesheet" href="~/Content/bootstrap-theme.min.css" />
     <style>
-        .footer {
-            position: fixed;
-            bottom: 0;
+        /** {
+            border: 1px solid black;
+        }*/
+
+        body {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+        p {
+            word-wrap: break-word;
+        }
+
+        .flex {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+        }
+
+        footer {
             margin-bottom: 5px;
-            width: inherit;
+        }
+
+        #discussion {
+            border: 1px solid blue;
+            border-radius: 5px;
+            flex-direction: column;
+            display: flex;
+            flex: 1;
+            padding: 5px;
+            margin: 5px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
     </style>
 </head>
-<body>
+<body class="container">
     <input type="hidden" id="displayname" />
-    <div class="container">
+    <div class="flex">
         <div id="discussion"></div>
-        <footer class="footer">
-            <input type="text" class="form-control" id="message" />
-        </footer>
     </div>
+    <footer>
+        <input type="text" class="form-control" id="message" />
+    </footer>
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
     <script src="~/signalr/hubs"></script>
     <script src="~/Scripts/bootstrap.min.js"></script>
     <script>
         $(function () {
-            var chat = $.connection.chatHub;
+            var chat = $.connection.chatHub,
+                inc = 0;
             chat.client.addNewMessageToPage = function (name, message) {
-                $('#discussion').append('<p><strong>' + htmlEncode(name)
+                inc++;
+                $('#discussion').append('<p id="' + inc + '"><strong>' + htmlEncode(name)
                     + '</strong>: ' + htmlEncode(message) + '</p>');
+                $("#discussion").animate({
+                    scrollTop: $("#discussion")[0].scrollHeight
+                }, "slow");
             };
             //$('#displayname').val(prompt('Enter your name:', ''));
             $('#displayname').val('Aurelien');
