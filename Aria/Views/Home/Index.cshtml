@@ -9,16 +9,24 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Aria Chat</title>
-    <link rel="stylesheet" href="~/Content/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/Content/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="~/Content/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/bootstrap-theme.min.css" />
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            margin-bottom: 5px;
+            width: inherit;
+        }
+    </style>
 </head>
 <body>
-<div>
+    <input type="hidden" id="displayname" />
     <div class="container">
-        <input type="text" id="message" />
-        <input type="button" id="sendmessage" value="Send" />
-        <input type="hidden" id="displayname" />
-        <ul id="discussion"></ul>
+        <div id="discussion"></div>
+        <footer class="footer">
+            <input type="text" class="form-control" id="message" />
+        </footer>
     </div>
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
@@ -28,15 +36,18 @@
         $(function () {
             var chat = $.connection.chatHub;
             chat.client.addNewMessageToPage = function (name, message) {
-                $('#discussion').append('<li><strong>' + htmlEncode(name)
-                    + '</strong>: ' + htmlEncode(message) + '</li>');
+                $('#discussion').append('<p><strong>' + htmlEncode(name)
+                    + '</strong>: ' + htmlEncode(message) + '</p>');
             };
-            $('#displayname').val(prompt('Enter your name:', ''));
+            //$('#displayname').val(prompt('Enter your name:', ''));
+            $('#displayname').val('Aurelien');
             $('#message').focus();
             $.connection.hub.start().done(function () {
-                $('#sendmessage').click(function () {
-                    chat.server.send($('#displayname').val(), $('#message').val());
-                    $('#message').val('').focus();
+                $('#message').keyup(function (e) {
+                    if (e.which === 13) {
+                        chat.server.send($('#displayname').val(), $('#message').val());
+                        $('#message').val('').focus();
+                    }
                 });
             });
         });
@@ -44,7 +55,6 @@
             var encodedValue = $('<div />').text(value).html();
             return encodedValue;
         }
-        </script>
-    </div>
+    </script>
 </body>
 </html>
