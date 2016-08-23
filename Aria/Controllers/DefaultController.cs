@@ -6,7 +6,7 @@ using System.Web.Mvc;
 
 namespace Aria.Controllers
 {
-    public class DefaultController : Controller
+    public class HomeController : Controller
     {
         // GET: Default
         public ActionResult Index()
