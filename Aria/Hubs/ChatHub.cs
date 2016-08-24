@@ -11,6 +11,7 @@ namespace Aria.Hubs
         public void Send(string name, string message)
         {
             Clients.All.addNewMessageToPage(name, message);
+            new Aria.DB.MongoDb().RegisterNewMessage(name, DateTime.Now, message);
         }
     }
 }

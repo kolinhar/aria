@@ -66,6 +66,7 @@
     <script src="~/signalr/hubs"></script>
     <script src="~/Scripts/bootstrap.min.js"></script>
     <script>
+        var json_payload = @Html.Raw(Json.Encode(ViewBag.payload));
         $(function () {
             var chat = $.connection.chatHub,
                 inc = 0;

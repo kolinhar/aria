@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Web;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -13,7 +14,7 @@ namespace Aria.DB
 
         public MongoDb()
         {
-            Mongo = new MongoClient("mongodb://x18srhrgcb7:27017");
+            Mongo = new MongoClient(MvcApplication.MongoLink);
         }
 
         public static IMongoCollection<T> GetCollection<T>(string collection)
@@ -23,9 +24,18 @@ namespace Aria.DB
 
         public void RegisterNewMessage(string name, DateTime timestamp, string message)
         {
-            var filtre = Builders<Conversation>.Filter.Eq("daystamp", $"{DateTime.Now.Day}{DateTime.Now.Month}{DateTime.Now.Year}");
+            var filtre = Builders<Conversation>.Filter.Eq("Daystamp", $"{DateTime.Now.Day}{DateTime.Now.Month}{DateTime.Now.Year}");
             var push = Builders<Conversation>.Update.Push("Messages", MessageFactory(name, timestamp, message));
-            GetCollection<Conversation>("conversations").UpdateOneAsync(filtre, push);
+            GetCollection<Conversation>("conversations").UpdateOneAsync(filtre, push, new UpdateOptions() { IsUpsert = true });
+        }
+
+        public List<Message> ReadMessages()
+        {
+            var filtre = Builders<Conversation>.Filter.Eq("Daystamp", $"{DateTime.Now.Day}{DateTime.Now.Month}{DateTime.Now.Year}");
+            var bson = GetCollection<Conversation>("conversations").FindSync(filtre).FirstOrDefault();
+            if (bson != null)
+                return bson.Messages;
+            return new List<Message>();
         }
 
         private Message MessageFactory(string name, DateTime timestamp, string message)
@@ -48,8 +58,8 @@ namespace Aria.DB
     public class Conversation
     {
         public ObjectId _id { get; set; }
-        public string daystamp { get; set; }
-        public List<string> Messages { get; set; }
+        public string Daystamp { get; set; }
+        public List<Message> Messages { get; set; }
     }
 
     public class Message

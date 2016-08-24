@@ -11,6 +11,7 @@ namespace Aria.Controllers
         // GET: Default
         public ActionResult Index()
         {
+            ViewBag.payload = new Aria.DB.MongoDb().ReadMessages();
             return View();
         }
     }
