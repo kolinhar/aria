@@ -67,6 +67,20 @@
     <script src="~/Scripts/bootstrap.min.js"></script>
     <script>
         var json_payload = @Html.Raw(Json.Encode(ViewBag.payload));
+
+        if (document.cookie.trim() !== '')
+            var sayMyName = JSON.parse(document.cookie).name;
+        else
+            sayMyName = prompt('Enter your nickname:', '');
+
+        if (sayMyName.trim() === "") {
+            alert("You must enter a nickname!");
+            throw "no nick.";
+        }
+
+        sayMyName = sayMyName.trim();
+
+        document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
         $(function () {
             var inc = 0;
 
@@ -81,13 +95,13 @@
                 $('#discussion').append('<p id="' + inc + '">'
                     +'<strong>[' + new Date().getDateTimeFR()
                     + '] '
-                    + htmlEncode(name)
+                    + htmlEncode(sayMyName)
                     + '</strong>: ' + htmlEncode(message) + '</p>');
                 $("#discussion").animate({
                     scrollTop: $("#discussion")[0].scrollHeight
                 }, "slow");
             };
-            $('#displayname').val(prompt('Enter your name:', ''));
+            $('#displayname').val(sayMyName);
 
             $('#message').focus();
             $.connection.hub.start().done(function () {
