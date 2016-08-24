@@ -77,8 +77,8 @@
                     scrollTop: $("#discussion")[0].scrollHeight
                 }, "slow");
             };
-            //$('#displayname').val(prompt('Enter your name:', ''));
-            $('#displayname').val('Aurelien');
+            $('#displayname').val(prompt('Enter your name:', ''));
+            //$('#displayname').val('Aurelien');
             $('#message').focus();
             $.connection.hub.start().done(function () {
                 $('#message').keyup(function (e) {
