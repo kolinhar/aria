@@ -68,18 +68,27 @@
     <script>
         var json_payload = @Html.Raw(Json.Encode(ViewBag.payload));
         $(function () {
-            var chat = $.connection.chatHub,
-                inc = 0;
+            var inc = 0;
+
+            json_payload.forEach(function(x) {
+                inc++;
+                $('#discussion').append('<p id="' + inc + '"><strong>[' + htmlEncode(ParseDate(x.DateTime).getDateTimeFR()) + '] ' + htmlEncode(x.Username)+ '</strong>: ' + htmlEncode(x.Content) + '</p>');
+            });
+
+            var chat = $.connection.chatHub;
             chat.client.addNewMessageToPage = function (name, message) {
                 inc++;
-                $('#discussion').append('<p id="' + inc + '"><strong>' + htmlEncode(name)
+                $('#discussion').append('<p id="' + inc + '">'
+                    +'<strong>[' + new Date().getDateTimeFR()
+                    + '] '
+                    + htmlEncode(name)
                     + '</strong>: ' + htmlEncode(message) + '</p>');
                 $("#discussion").animate({
                     scrollTop: $("#discussion")[0].scrollHeight
                 }, "slow");
             };
             $('#displayname').val(prompt('Enter your name:', ''));
-            //$('#displayname').val('Aurelien');
+
             $('#message').focus();
             $.connection.hub.start().done(function () {
                 $('#message').keyup(function (e) {
@@ -94,6 +103,42 @@
             var encodedValue = $('<div />').text(value).html();
             return encodedValue;
         }
+    </script>
+    <script>
+        var ParseDate = function (dateStr)
+        {
+            var l_dateStr = /\d{13}/.exec(dateStr);
+
+            if (l_dateStr.length === 1)
+                return new Date(parseInt(l_dateStr[0], 10));
+
+            return new Date("Invalid Date");
+        };
+
+        /**
+        * RETOURNE UNE STRING DE LA DATE ET L'HEURE ACTUELLE AU FORMAT FRANÇAIS
+        * returns {String} : JJ/MM/AAAA HH:MM
+        */
+        Date.prototype.getDateTimeFR = function ()
+        {
+            var now = this;
+            return [_AffZero(now.getHours()), _AffZero(now.getMinutes())].join(':');
+        };
+
+        /**AFFICHE UN ZÉRO SI LE NOMBRE PASSÉ EN PARAMÈTRE EST INFÉRIEUR À 10
+        * param {Number} nombre
+        * returns {String} chaine au format numérique
+        */
+        var _AffZero = function (nombre)
+        {
+            if (!isNaN(nombre)) {
+                if (nombre < 10) {
+                    return "0" + nombre;
+                }
+                return "" + nombre;
+            }
+            return nombre;
+        };
     </script>
 </body>
 </html>
