@@ -16,10 +16,10 @@
         }*/
 
         body {
-            height: 100vh;
-            display: flex;
+            /*height: 100vh;*/
+            /*display: flex;
             flex-direction: column;
-            flex-wrap: wrap;
+            flex-wrap: wrap;*/
             background-image: url("../Static/pinguin.jpg");
             background-repeat: repeat;
         }
@@ -51,16 +51,39 @@
             overflow-x: hidden;
             background-color: whitesmoke;
         }
+
+        .leftStick {
+            margin-top: 5px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
     </style>
 </head>
-<body class="container">
-    <input type="hidden" id="displayname" />
-    <div class="flex">
-        <div id="discussion"></div>
+<body class="container-fluid row">
+
+    <nav class="col-md-2 leftStick">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                Liste des personnes connectées
+            </div>
+            <div class="panel-body">
+                <ul class="list-group" id="list-users"></ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="col-md-8 row">
+        <div class="col-md-12">
+            <input type="hidden" id="displayname" />
+            <div class="flex">
+                <div id="discussion"></div>
+            </div>
+        </div>
+        <footer class="col-md-12">
+            <input type="text" class="form-control" id="message" />
+        </footer>
     </div>
-    <footer>
-        <input type="text" class="form-control" id="message" />
-    </footer>
+
     <script src="~/Scripts/jquery-1.10.2.min.js"></script>
     <script src="~/Scripts/jquery.signalR-2.1.2.min.js"></script>
     <script src="~/signalr/hubs"></script>
@@ -81,46 +104,81 @@
         sayMyName = sayMyName.trim();
 
         document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
-        $(function () {
+        $(function() {
             var inc = 0;
 
             json_payload.forEach(function(x) {
                 inc++;
-                $('#discussion').append('<p id="' + inc + '"><strong>[' + htmlEncode(ParseDate(x.DateTime).getDateTimeFR()) + '] ' + htmlEncode(x.Username)+ '</strong>: ' + htmlEncode(x.Content) + '</p>');
+                $('#discussion')
+                    .append('<p id="' +
+                        inc +
+                        '"><strong>[' +
+                        htmlEncode(ParseDate(x.DateTime).getDateTimeFR()) +
+                        '] ' +
+                        htmlEncode(x.Username) +
+                        '</strong>: ' +
+                        htmlEncode(x.Content) +
+                        '</p>');
             });
 
             var chat = $.connection.chatHub;
-            chat.client.addNewMessageToPage = function (name, message) {
+
+            chat.client.callBackUserName = function() {
+                chat.server.registerUserName($("#displayname").val());
+                console.log("j'ai renvoyé mon username.");
+            };
+
+            chat.client.broadCastUsersList = function(users) {
+                $("#list-users").children().remove();
+
+                for (var user in users) {
+                    $("#list-users").append($("<li class='list-group-item'>"
+                        + users[user]
+                        + "</li>"));
+                }
+            };
+
+            chat.client.addNewMessageToPage = function(name, message) {
                 inc++;
-                $('#discussion').append('<p id="' + inc + '">'
-                    +'<strong>[' + new Date().getDateTimeFR()
-                    + '] '
-                    + htmlEncode(sayMyName)
-                    + '</strong>: ' + htmlEncode(message) + '</p>');
-                $("#discussion").animate({
-                    scrollTop: $("#discussion")[0].scrollHeight
-                }, "slow");
+                $('#discussion')
+                    .append('<p id="' +
+                        inc +
+                        '">' +
+                        '<strong>[' +
+                        new Date().getDateTimeFR() +
+                        '] ' +
+                        htmlEncode(sayMyName) +
+                        '</strong>: ' +
+                        htmlEncode(message) +
+                        '</p>');
+                $("#discussion")
+                    .animate({
+                        scrollTop: $("#discussion")[0].scrollHeight
+                    },
+                        "slow");
             };
             $('#displayname').val(sayMyName);
 
             $('#message').focus();
-            $.connection.hub.start().done(function () {
-                $('#message').keyup(function (e) {
-                    if (e.which === 13) {
-                        chat.server.send($('#displayname').val(), $('#message').val());
-                        $('#message').val('').focus();
-                    }
+            $.connection.hub.start()
+                .done(function() {
+                    $('#message')
+                        .keyup(function(e) {
+                            if (e.which === 13) {
+                                chat.server.send($('#displayname').val(), $('#message').val());
+                                $('#message').val('').focus();
+                            }
+                        });
                 });
-            });
         });
+
         function htmlEncode(value) {
             var encodedValue = $('<div />').text(value).html();
             return encodedValue;
         }
     </script>
     <script>
-        var ParseDate = function (dateStr)
-        {
+        var ParseDate = function(dateStr) {
             var l_dateStr = /\d{13}/.exec(dateStr);
 
             if (l_dateStr.length === 1)
@@ -133,8 +191,7 @@
         * RETOURNE UNE STRING DE LA DATE ET L'HEURE ACTUELLE AU FORMAT FRANÇAIS
         * returns {String} : JJ/MM/AAAA HH:MM
         */
-        Date.prototype.getDateTimeFR = function ()
-        {
+        Date.prototype.getDateTimeFR = function() {
             var now = this;
             return [_AffZero(now.getHours()), _AffZero(now.getMinutes())].join(':');
         };
@@ -143,8 +200,7 @@
         * param {Number} nombre
         * returns {String} chaine au format numérique
         */
-        var _AffZero = function (nombre)
-        {
+        var _AffZero = function(nombre) {
             if (!isNaN(nombre)) {
                 if (nombre < 10) {
                     return "0" + nombre;
