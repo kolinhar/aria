@@ -1,0 +1,24 @@
+﻿@*@{
+        Layout = null;
+    }*@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+    <div>
+        @using (Html.BeginForm("AddMongo", "Config"))
+        {
+            <label>
+                Please enter mongo URL :
+                <input type="text" name="mongo" />
+            </label>
+            <input type="submit" />
+        }
+    </div>
+</body>
+</html>

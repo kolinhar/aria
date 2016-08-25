@@ -20,19 +20,16 @@ namespace Aria
             ReadConfig();
         }
 
-        private bool ReadConfig()
+        private void ReadConfig()
         {
             if (File.Exists(Server.MapPath("Config.json")))
             {
                 string content = File.ReadAllText(Server.MapPath("Config.json"));
                 MongoLink = Json.Decode<Config>(content).MongoLink;
-
-                return true;
             }
             else
             {
                 File.WriteAllText(Server.MapPath("Config.json"), Json.Encode(new Config()));
-                return false;
             }
         }
     }
