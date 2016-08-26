@@ -53,6 +53,15 @@
             overflow-y: auto;
             overflow-x: hidden;
         }
+
+        hr {
+            width: 100%; 
+            color: black; 
+            height: 1px; 
+            background-color:black;
+            margin-top: 2px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body class="container-fluid">
@@ -104,10 +113,16 @@
         sayMyName = sayMyName.trim();
 
         document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
+
+
         $(function() {
-            json_payload.forEach(function(x) {
-                affTexte(x.Username, ParseDate(x.DateTime), x.Content);
-            });
+            for (var dateStr in json_payload) {
+                $('#discussion').append('<hr/><p class="text-center">Message Log for '+dateStr+'</p><hr/>');
+
+                json_payload[dateStr].forEach(function(x) {
+                    affTexte(x.Username, ParseDate(x.DateTime), x.Content);
+                });
+            }
 
             var chat = $.connection.chatHub;
 
@@ -168,11 +183,8 @@
                 '</p>');
             $('#discussion')
                 .append(element.linkify({ target: "_blank" }));
-            $("#discussion")
-                .animate({
-                    scrollTop: $("#discussion")[0].scrollHeight
-                },
-                    "slow");
+
+            $("#discussion").scrollTop($("#discussion")[0].scrollHeight);
         };
     </script>
     <script>
