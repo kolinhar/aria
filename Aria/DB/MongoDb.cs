@@ -29,9 +29,9 @@ namespace Aria.DB
             GetCollection<Conversation>("conversations").UpdateOneAsync(filtre, push, new UpdateOptions() { IsUpsert = true });
         }
 
-        public List<Message> ReadMessages()
+        public List<Message> ReadMessages(DateTime dateHisto)
         {
-            var filtre = Builders<Conversation>.Filter.Eq("Daystamp", $"{DateTime.Now.Day}{DateTime.Now.Month}{DateTime.Now.Year}");
+            var filtre = Builders<Conversation>.Filter.Eq("Daystamp", $"{dateHisto.Day}{dateHisto.Month}{dateHisto.Year}");
             var bson = GetCollection<Conversation>("conversations").FindSync(filtre).FirstOrDefault();
             if (bson != null)
                 return bson.Messages;
