@@ -152,6 +152,7 @@
     <Content Include="Scripts\jquery.signalR-2.1.2.min.js" />
     <Content Include="Scripts\linkify-jquery.min.js" />
     <Content Include="Scripts\linkify.min.js" />
+    <Content Include="Static\favicon.ico" />
     <Content Include="Static\geometric.png" />
     <Content Include="Static\pinguin.jpg" />
     <Content Include="Web.config" />
