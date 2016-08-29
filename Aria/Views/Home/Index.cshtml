@@ -56,10 +56,10 @@
         }
 
         hr {
-            width: 100%; 
-            color: black; 
-            height: 1px; 
-            background-color:black;
+            width: 100%;
+            color: black;
+            height: 1px;
+            background-color: black;
             margin-top: 2px;
             margin-bottom: 5px;
         }
@@ -115,8 +115,19 @@
 
         document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
 
-
         $(function() {
+            if (!("Notification" in window)) {
+                alert("Dinosaurus browserus, update to recent browser!");
+            }
+
+            else if (Notification.permission !== 'denied') {
+                Notification.requestPermission(function (permission) {
+
+                    if(!('permission' in Notification)) {
+                        Notification.permission = permission;
+                    }
+                })
+            }
             for (var dateStr in json_payload) {
                 $('#discussion').append('<hr/><p class="text-center">Message Log for '+dateStr+'</p><hr/>');
 
@@ -143,6 +154,8 @@
 
             chat.client.addNewMessageToPage = function(name, message) {
                 affTexte(name, new Date(), message);
+                if (Notification.permission === "granted" && name !== $('#displayname').val())
+                    var notif = new Notification(htmlEncode(name), { body: htmlEncode(message)});
             };
             $('#displayname').val(sayMyName);
 
