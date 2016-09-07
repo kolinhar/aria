@@ -195,8 +195,23 @@
                 '</strong>: ' +
                 htmlEncode(message) +
                 '</p>');
+
+            var eltLinked = element.linkify({ 
+                target: "_blank"
+            });
+
+            /* COMBLE DES FAILLES DE LINKIFY
+             * LE NATIF VAINCRA!
+            */
+            var aTab = eltLinked[0].getElementsByTagName("a");
+            
+            for (var i = 0; i < aTab.length; i++) {
+                aTab[i].setAttribute("rel", "noopener noreferrer");
+            }
+
+
             $('#discussion')
-                .append(element.linkify({ target: "_blank" }));
+                .append(eltLinked);
 
             $("#discussion").scrollTop($("#discussion")[0].scrollHeight);
         };
