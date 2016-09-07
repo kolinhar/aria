@@ -116,10 +116,11 @@
         document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
 
         $(function() {
+            var listNames = {};
+
             if (!("Notification" in window)) {
                 alert("Dinosaurus browserus, update to recent browser!");
             }
-
             else if (Notification.permission !== 'denied') {
                 Notification.requestPermission(function (permission) {
 
@@ -128,6 +129,7 @@
                     }
                 })
             }
+
             for (var dateStr in json_payload) {
                 $('#discussion').append('<hr/><p class="text-center">Message Log for '+dateStr+'</p><hr/>');
 
@@ -146,9 +148,18 @@
                 $("#list-users").children().remove();
 
                 for (var user in users) {
+                    if (listNames[users[user]] === undefined)
+                        listNames[users[user]] = 0;
+
+                    //SI IL Y A UN NOUVEL UTILISATEUR, ON CRÉE UNE RÈGLE POUR SON NOM
+                    if (listNames[users[user]] === 0)
+                        createNewCSSRule(users[user]);
+
                     $("#list-users").append($("<li class='list-group-item'>"
                         + users[user]
                         + "</li>"));
+
+                    listNames[users[user]]++;
                 }
             };
 
@@ -191,7 +202,11 @@
                 '<strong>[' +
                 date.getDateTimeFR() +
                 '] ' +
+                '<span class="'+
+                normalizeNameForCSSRule(name) +
+                '">' +
                 htmlEncode(name) +
+                "</span>" +
                 '</strong>: ' +
                 htmlEncode(message) +
                 '</p>');
@@ -208,12 +223,34 @@
             for (var i = 0; i < aTab.length; i++) {
                 aTab[i].setAttribute("rel", "noopener noreferrer");
             }
-
-
-            $('#discussion')
-                .append(eltLinked);
+            
+            $('#discussion').append(eltLinked);
 
             $("#discussion").scrollTop($("#discussion")[0].scrollHeight);
+        };
+
+        var createNewCSSRule = function(nameToRule){
+            var style = document.getElementsByTagName("style")[0].sheet;
+
+            style.insertRule("." + normalizeNameForCSSRule(nameToRule) + " {color:" + getRandomHexColor() + ";}", style.cssRules.length)
+        };
+
+        var getRandomHexColor = function(){
+            return "#" + getRandomHex() + getRandomHex() + getRandomHex();
+        };
+
+        var getRandomHex = function(){
+            var num = getRandomIntInclusive(0, 255).toString(16);
+            
+            return (num.length < 2 ? "0" + num : num);
+        };
+
+        var getRandomIntInclusive = function(min, max) {
+            return Math.floor(Math.random() * (max - min +1)) + min;
+        };
+
+        var normalizeNameForCSSRule = function(name) {
+            return name.toString().replace(/ |\W/gm, "");
         };
     </script>
     <script>
