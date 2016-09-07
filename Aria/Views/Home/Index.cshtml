@@ -116,7 +116,16 @@
         document.cookie = JSON.stringify({ name: sayMyName }) + ';max-age=2592000';
 
         $(function() {
-            var listNames = {};
+            var listNames = {},
+                focused = true;
+
+            document.onfocus = function(e){
+                focused = true;
+            };
+
+            document.onblur = function(e){
+                focused = false;
+            };
 
             if (!("Notification" in window)) {
                 alert("Dinosaurus browserus, update to recent browser!");
@@ -165,7 +174,7 @@
 
             chat.client.addNewMessageToPage = function(name, message) {
                 affTexte(name, new Date(), message);
-                if (Notification.permission === "granted" && name !== $('#displayname').val())
+                if (Notification.permission === "granted" && name !== $('#displayname').val() && focused === false)
                     var notif = new Notification(htmlEncode(name), { body: htmlEncode(message)});
             };
             $('#displayname').val(sayMyName);
