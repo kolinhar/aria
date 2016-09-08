@@ -143,6 +143,8 @@
                 $('#discussion').append('<hr/><p class="text-center">Message Log for '+dateStr+'</p><hr/>');
 
                 json_payload[dateStr].forEach(function(x) {
+                    createNewCSSRule(listNames, x.Username);
+
                     affTexte(x.Username, ParseDate(x.DateTime), x.Content);
                 });
             }
@@ -157,29 +159,25 @@
                 $("#list-users").children().remove();
 
                 for (var user in users) {
-                    if (listNames[users[user]] === undefined)
-                        listNames[users[user]] = 0;
-
-                    //SI IL Y A UN NOUVEL UTILISATEUR, ON CRÉE UNE RÈGLE POUR SON NOM
-                    if (listNames[users[user]] === 0)
-                        createNewCSSRule(users[user]);
-
                     $("#list-users").append($("<li class='list-group-item'>"
                         + users[user]
                         + "</li>"));
-
-                    listNames[users[user]]++;
                 }
             };
 
             chat.client.addNewMessageToPage = function(name, message) {
+                createNewCSSRule(listNames, name);
+
                 affTexte(name, new Date(), message);
+
                 if (Notification.permission === "granted" && name !== $('#displayname').val() && focused === false)
                     var notif = new Notification(htmlEncode(name), { body: htmlEncode(message)});
             };
+
             $('#displayname').val(sayMyName);
 
             $('#message').focus();
+
             $.connection.hub.start()
                 .done(function() {
                     $('#message')
@@ -238,26 +236,57 @@
             $("#discussion").scrollTop($("#discussion")[0].scrollHeight);
         };
 
-        var createNewCSSRule = function(nameToRule){
-            var style = document.getElementsByTagName("style")[0].sheet;
+        /**
+        * CRÉE UNE NOUVELLE RÉGLE CSS SI IL Y A LIEU POUR UN PSEUDO DONNÉ
+        * param {Object} listNames - la liste des noms déjà utilisés
+        * param {string} nameToRule - le pseudo à styler
+        */
+        var createNewCSSRule = function(listNames, nameToRule){
+            var newName = normalizeNameForCSSRule(nameToRule);
 
-            style.insertRule("." + normalizeNameForCSSRule(nameToRule) + " {color:" + getRandomHexColor() + ";}", style.cssRules.length)
+            //SI LE PSEUDO EXISTE DÉJÀ ON NE CRÉE PAS DE RÈGLE
+            if(newName in listNames)
+                return;
+
+            listNames[newName] = 1;
+
+            var style = document.getElementsByTagName("style")[0].sheet;
+            style.insertRule("." + newName + " {color:" + getRandomHexColor() + ";}", style.cssRules.length)
         };
 
+        /**
+        * RETOURNE UNE COULEUR ALÉATOIRE EN HEXADÉCIMAL
+        * returns {string} - la couleur en héxa préfixée du dièse
+        */
         var getRandomHexColor = function(){
             return "#" + getRandomHex() + getRandomHex() + getRandomHex();
         };
 
+        /**
+        * RETOURNE UN NOMBRE ALÉATOIRE HEXADÉCIMAL COMPRIS ENNTRE 0 ET 255 PRÉCÉDÉ D'UN ZÉRO SI SA TAILLE NE FAIT QU'UN SEUL CARACTÈRE
+        * returns {string} - le nombre en hexa formaté
+        */
         var getRandomHex = function(){
             var num = getRandomIntInclusive(0, 255).toString(16);
             
             return (num.length < 2 ? "0" + num : num);
         };
 
+        /**
+        * RETOURNE UN NOMBRE ALÉATOIRE COMPRIS DANS UN INTERVAL DONNÉ
+        * param {number} min - le nombre minimum
+        * param {number} max - le nombre maximum
+        * returns {number} - un nombre entre min et max
+        */
         var getRandomIntInclusive = function(min, max) {
             return Math.floor(Math.random() * (max - min +1)) + min;
         };
 
+        /**
+        * RETOURNE UNE CHAINE FORMATÉE POUR POUVOIR ÊTRE UN NOM DE RÈGLE CSS
+        * param {string} name - le nom à formater
+        * returns {string}
+        */
         var normalizeNameForCSSRule = function(name) {
             return name.toString().replace(/ |\W/gm, "");
         };
