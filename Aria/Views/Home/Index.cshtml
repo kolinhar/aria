@@ -183,7 +183,12 @@
                     $('#message')
                         .keyup(function(e) {
                             if (e.which === 13) {
-                                chat.server.send($('#displayname').val(), $('#message').val());
+                                var l_msg = $('#message').val().trim();
+
+                                if(l_msg === "")
+                                    return;
+
+                                chat.server.send($('#displayname').val(), l_msg);
                                 $('#message').val('').focus();
                             }
                         });
