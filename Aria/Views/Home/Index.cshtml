@@ -119,13 +119,10 @@
             var listNames = {},
                 focused = true;
 
-            document.onfocus = function(e){
-                focused = true;
-            };
-
-            document.onblur = function(e){
-                focused = false;
-            };
+            document.addEventListener('visibilitychange',
+                function() {
+                    focused = !focused;
+                });
 
             if (!("Notification" in window)) {
                 alert("Dinosaurus browserus, update to recent browser!");
