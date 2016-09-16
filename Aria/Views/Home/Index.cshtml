@@ -63,6 +63,18 @@
             margin-top: 2px;
             margin-bottom: 5px;
         }
+
+        .violet{color: rgb(11,30,120)}
+        .prune{color: rgb(161, 0, 107)}
+        .framboise{color: rgb(205, 0, 55)}
+        .orange{color: rgb(224, 82, 6)}
+        .safran{color: rgb(255, 182, 18)}
+        .anis{color: rgb(210, 225, 0)}
+        .pomme{color: rgb(130, 190, 0)}
+        .canard{color: rgb(0, 154, 166)}
+        .bleu{color: rgb(0, 136, 205)}
+        .rouge{color: rgb(123, 43, 30)}
+        .carbone{color: rgb(60, 55, 50)}
     </style>
 </head>
 <body class="container-fluid">
@@ -99,7 +111,9 @@
 
     <script>
         "use strict";
-        var json_payload = @Html.Raw(Json.Encode(ViewBag.payload));
+        var json_payload = @Html.Raw(Json.Encode(ViewBag.payload)),
+                colorsOrig = ["violet", "prune", "framboise", "orange", "safran", "anis", "pomme", "canard", "bleu", "rouge", "carbone"],
+                colorsDispo = colorsOrig.slice(0);
 
         if (document.cookie.trim() !== '')
             var sayMyName = JSON.parse(document.cookie).name;
@@ -146,7 +160,7 @@
                 json_payload[dateStr].forEach(function(x) {
                     createNewCSSRule(listNames, x.Username);
 
-                    affTexte(x.Username, ParseDate(x.DateTime), x.Content);
+                    affTexte(x.Username, ParseDate(x.DateTime), x.Content, listNames);
                 });
             }
 
@@ -169,7 +183,7 @@
             chat.client.addNewMessageToPage = function(name, message) {
                 createNewCSSRule(listNames, name);
 
-                affTexte(name, new Date(), message);
+                affTexte(name, new Date(), message, listNames);
 
                 if (Notification.permission === "granted" && name !== $('#displayname').val() && focused === false)
                     var notif = new Notification(htmlEncode(name), { body: htmlEncode(message)});
@@ -206,8 +220,9 @@
         * param {string} name - le nom de l'utilisateur
         * param {Date} date - la date du message
         * param {string} message - le message de l'utilisateur
+        * param {string} listNames - la liste des noms
         */
-        var affTexte = function(name, date, message) {
+        var affTexte = function(name, date, message, listNames) {
             var element = $('<p id="' +
                 new Date().getTime() +
                 Math.random() +
@@ -216,7 +231,7 @@
                 date.getDateTimeFR() +
                 '] ' +
                 '<span class="'+
-                normalizeNameForCSSRule(name) +
+                getClassForName(name, listNames) +
                 '">' +
                 htmlEncode(name) +
                 "</span>" +
@@ -243,58 +258,43 @@
         };
 
         /**
+        * RETOURNE LA CLASSE ASSOCIÉ AU NOM
+        * param {string} name - le nom
+        * param {string} listNames - la liste des noms
+        * returns {string} - la classe associée
+        */
+        var getClassForName = function(name, listNames){
+            createNewCSSRule(listNames, name);
+
+            return listNames[name];
+        };
+
+        /**
         * CRÉE UNE NOUVELLE RÉGLE CSS SI IL Y A LIEU POUR UN PSEUDO DONNÉ
         * param {Object} listNames - la liste des noms déjà utilisés
         * param {string} nameToRule - le pseudo à styler
         */
         var createNewCSSRule = function(listNames, nameToRule){
-            var newName = normalizeNameForCSSRule(nameToRule);
-
             //SI LE PSEUDO EXISTE DÉJÀ ON NE CRÉE PAS DE RÈGLE
-            if(newName in listNames)
+            if(nameToRule in listNames)
                 return;
 
-            listNames[newName] = 1;
-
-            var style = document.getElementsByTagName("style")[0].sheet;
-            style.insertRule("." + newName + " {color:" + getRandomHexColor() + ";}", style.cssRules.length)
+            listNames[nameToRule] = getRandomClass();
         };
 
         /**
         * RETOURNE UNE COULEUR ALÉATOIRE EN HEXADÉCIMAL
         * returns {string} - la couleur en héxa préfixée du dièse
         */
-        var getRandomHexColor = function(){
-            return "#" + getRandomHex() + getRandomHex() + getRandomHex();
+        var getRandomClass = function(){
+            if (colorsDispo.length === 0) 
+                colorsDispo = colorsOrig.slice(0);
+
+            return colorsDispo.splice(getRandomIntInclusive(0, colorsDispo.length -1), 1)[0];
         };
 
-        /**
-        * RETOURNE UN NOMBRE ALÉATOIRE HEXADÉCIMAL COMPRIS ENNTRE 0 ET 255 PRÉCÉDÉ D'UN ZÉRO SI SA TAILLE NE FAIT QU'UN SEUL CARACTÈRE
-        * returns {string} - le nombre en hexa formaté
-        */
-        var getRandomHex = function(){
-            var num = getRandomIntInclusive(0, 255).toString(16);
-
-            return (num.length < 2 ? "0" + num : num);
-        };
-
-        /**
-        * RETOURNE UN NOMBRE ALÉATOIRE COMPRIS DANS UN INTERVAL DONNÉ
-        * param {number} min - le nombre minimum
-        * param {number} max - le nombre maximum
-        * returns {number} - un nombre entre min et max
-        */
         var getRandomIntInclusive = function(min, max) {
             return Math.floor(Math.random() * (max - min +1)) + min;
-        };
-
-        /**
-        * RETOURNE UNE CHAINE FORMATÉE POUR POUVOIR ÊTRE UN NOM DE RÈGLE CSS
-        * param {string} name - le nom à formater
-        * returns {string}
-        */
-        var normalizeNameForCSSRule = function(name) {
-            return name.toString().replace(/ |\W/gm, "");
         };
     </script>
     <script>
